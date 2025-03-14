@@ -13,60 +13,66 @@
         android:layout_weight="1"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
-    <LinearLayout
+    <android.widget.GridLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:padding="8dp">
+        android:columnCount="3"
+        android:padding="8dp"
+        android:rowCount="2"
+        android:alignmentMode="alignMargins">
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/prevButton"
             style="@style/Widget.Material3.Button.Icon"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:icon="@drawable/skip_previous"
+            android:layout_columnWeight="1"
+            app:icon="@drawable/skip_previous"
             android:backgroundTint="?attr/colorPrimary" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/playButton"
             style="@style/Widget.Material3.Button.Icon"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:icon="@drawable/play_arrow"
-            android:backgroundTint="?attr/colorPrimary" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/stopButton"
-            style="@style/Widget.Material3.Button.Icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:icon="@drawable/stop"
+            android:layout_columnWeight="1"
+            app:icon="@drawable/play_arrow"
             android:backgroundTint="?attr/colorPrimary" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/nextButton"
             style="@style/Widget.Material3.Button.Icon"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:icon="@drawable/skip_next"
+            android:layout_columnWeight="1"
+            app:icon="@drawable/skip_next"
             android:backgroundTint="?attr/colorPrimary" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/repeatButton"
             style="@style/Widget.Material3.Button.Icon"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:icon="@drawable/repeat"
+            android:layout_columnWeight="1"
+            app:icon="@drawable/repeat"
+            android:backgroundTint="?attr/colorPrimary" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/stopButton"
+            style="@style/Widget.Material3.Button.Icon"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            app:icon="@drawable/stop"
             android:backgroundTint="?attr/colorPrimary" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/detuneButton"
             style="@style/Widget.Material3.Button.Icon"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:icon="@drawable/tune432"
+            android:layout_columnWeight="1"
+            app:icon="@drawable/tune432"
             android:backgroundTint="?attr/colorPrimary" />
-
-    </LinearLayout>
+    </android.widget.GridLayout>
 </LinearLayout>

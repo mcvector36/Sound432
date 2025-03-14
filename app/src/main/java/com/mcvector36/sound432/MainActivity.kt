@@ -14,10 +14,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
 
-import android.media.audiofx.AudioEffect
-import android.media.audiofx.PresetReverb
-import android.media.audiofx.Equalizer
-import android.media.audiofx.Virtualizer
 import androidx.annotation.RequiresApi
 
 
@@ -45,6 +41,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+    @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -58,6 +55,14 @@ class MainActivity : AppCompatActivity() {
 
         detuneButton = findViewById(R.id.detuneButton)
         detuneButton.setOnClickListener { applyDetuneEffect() }
+
+        // Setare iconițe programatic
+        prevButton.setIconResource(R.drawable.skip_previous)
+        playButton.setIconResource(R.drawable.play_arrow)
+        stopButton.setIconResource(R.drawable.stop)
+        nextButton.setIconResource(R.drawable.skip_next)
+        repeatButton.setIconResource(R.drawable.repeat)
+        detuneButton.setIconResource(R.drawable.tune432)
 
 
         // Verifică și cere permisiunea de acces la media
@@ -126,16 +131,29 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun togglePlayPause() {
-        if (::mediaPlayer.isInitialized && mediaPlayer.isPlaying) {
+        if (musicList.isEmpty()) {
+            Toast.makeText(this, "Nu există melodii disponibile!", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        if (!::mediaPlayer.isInitialized) {
+            // Dacă nu este inițializat și nu a fost selectată o piesă, începe prima melodie
+            playMusic(0)
+        } else if (mediaPlayer.isPlaying) {
             mediaPlayer.pause()
             playButton.setIconResource(R.drawable.play_arrow)
         } else {
             mediaPlayer.start()
-            playButton.setIconResource(R.drawable.play_arrow)
+            playButton.setIconResource(R.drawable.pause) // Setăm iconița de pauză când redă
         }
     }
 
     private fun stopMusic() {
+        if (musicList.isEmpty()) {
+            // Dacă nu există melodii, butonul de stop nu face nimic
+            return
+        }
+
         if (::mediaPlayer.isInitialized) {
             mediaPlayer.stop()
             mediaPlayer.release()
@@ -160,13 +178,18 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun toggleRepeat() {
+        if (musicList.isEmpty()) {
+            return
+        }
         isRepeat = !isRepeat
         repeatButton.alpha = if (isRepeat) 1.0f else 0.5f // Evidențiază butonul când e activat
     }
 
     @RequiresApi(Build.VERSION_CODES.M)
     private fun applyDetuneEffect() {
-        if (::mediaPlayer.isInitialized) {
+        if (musicList.isEmpty()) {
+            return
+        } else if (::mediaPlayer.isInitialized) {
             val playbackParams = mediaPlayer.playbackParams
             playbackParams.pitch = 0.5f // -32 de semitonuri echivalent cu un factor de pitch de 0.5
             mediaPlayer.playbackParams = playbackParams
