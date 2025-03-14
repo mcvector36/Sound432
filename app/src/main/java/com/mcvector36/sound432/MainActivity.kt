@@ -31,6 +31,7 @@ class MainActivity : AppCompatActivity() {
 
     private var currentIndex = 0
     private var isRepeat = false
+    private var isDetuned = false
 
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
@@ -54,7 +55,7 @@ class MainActivity : AppCompatActivity() {
         repeatButton = findViewById(R.id.repeatButton)
 
         detuneButton = findViewById(R.id.detuneButton)
-        detuneButton.setOnClickListener { applyDetuneEffect() }
+        detuneButton.setOnClickListener { detuneMusic() }
 
         // Setare iconițe programatic
         prevButton.setIconResource(R.drawable.skip_previous)
@@ -74,6 +75,7 @@ class MainActivity : AppCompatActivity() {
         nextButton.setOnClickListener { nextTrack() }
         prevButton.setOnClickListener { previousTrack() }
         repeatButton.setOnClickListener { toggleRepeat() }
+        detuneButton.setOnClickListener { detuneMusic() }
     }
 
     private fun checkPermissions() {
@@ -186,16 +188,33 @@ class MainActivity : AppCompatActivity() {
     }
 
     @RequiresApi(Build.VERSION_CODES.M)
-    private fun applyDetuneEffect() {
+    private fun detuneMusic() {
         if (musicList.isEmpty()) {
             return
-        } else if (::mediaPlayer.isInitialized) {
+        }
+
+        if (::mediaPlayer.isInitialized && mediaPlayer.isPlaying) {
             val playbackParams = mediaPlayer.playbackParams
-            playbackParams.pitch = 0.5f // -32 de semitonuri echivalent cu un factor de pitch de 0.5
+            isDetuned = !isDetuned // Inversează starea dezacordării
+
+            detuneButton.alpha = 0.5f
+
+            if (isDetuned) {
+                playbackParams.pitch = 0.981f // Ajustare pentru -32 de centi
+            } else {
+                playbackParams.pitch = 1.0f // Revine la acordajul inițial
+            }
+
+            playbackParams.speed = 1.0f // Păstrează durata piesei neschimbată
             mediaPlayer.playbackParams = playbackParams
+
+            // Evidențiază butonul vizual
+            detuneButton.alpha = if (isDetuned) 1.0f else 0.5f
+            detuneButton.invalidate() // Forțează refresh-ul UI-ului
         } else {
             Toast.makeText(this, "Nicio melodie nu este redată!", Toast.LENGTH_SHORT).show()
         }
     }
+
 
 }
