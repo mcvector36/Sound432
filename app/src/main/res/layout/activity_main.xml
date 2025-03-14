@@ -59,5 +59,14 @@
             android:layout_height="wrap_content"
             android:icon="@drawable/repeat"
             android:backgroundTint="?attr/colorPrimary" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/detuneButton"
+            style="@style/Widget.Material3.Button.Icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:icon="@drawable/tune432"
+            android:backgroundTint="?attr/colorPrimary" />
+
     </LinearLayout>
 </LinearLayout>

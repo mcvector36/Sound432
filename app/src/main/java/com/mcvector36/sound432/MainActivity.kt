@@ -14,6 +14,13 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
 
+import android.media.audiofx.AudioEffect
+import android.media.audiofx.PresetReverb
+import android.media.audiofx.Equalizer
+import android.media.audiofx.Virtualizer
+import androidx.annotation.RequiresApi
+
+
 class MainActivity : AppCompatActivity() {
     private lateinit var mediaPlayer: MediaPlayer
     private lateinit var musicList: ArrayList<String>
@@ -23,6 +30,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var nextButton: MaterialButton
     private lateinit var prevButton: MaterialButton
     private lateinit var repeatButton: MaterialButton
+
+    private lateinit var detuneButton: MaterialButton
+
     private var currentIndex = 0
     private var isRepeat = false
 
@@ -45,6 +55,10 @@ class MainActivity : AppCompatActivity() {
         nextButton = findViewById(R.id.nextButton)
         prevButton = findViewById(R.id.prevButton)
         repeatButton = findViewById(R.id.repeatButton)
+
+        detuneButton = findViewById(R.id.detuneButton)
+        detuneButton.setOnClickListener { applyDetuneEffect() }
+
 
         // Verifică și cere permisiunea de acces la media
         checkPermissions()
@@ -149,4 +163,16 @@ class MainActivity : AppCompatActivity() {
         isRepeat = !isRepeat
         repeatButton.alpha = if (isRepeat) 1.0f else 0.5f // Evidențiază butonul când e activat
     }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun applyDetuneEffect() {
+        if (::mediaPlayer.isInitialized) {
+            val playbackParams = mediaPlayer.playbackParams
+            playbackParams.pitch = 0.5f // -32 de semitonuri echivalent cu un factor de pitch de 0.5
+            mediaPlayer.playbackParams = playbackParams
+        } else {
+            Toast.makeText(this, "Nicio melodie nu este redată!", Toast.LENGTH_SHORT).show()
+        }
+    }
+
 }
