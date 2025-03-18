@@ -9,4 +9,20 @@
         <item name="android:navigationBarColor">@color/black</item>
     </style>
 
+    <style name="personal1" parent="Theme.Material3.DayNight">
+        <item name="colorPrimary">#2B81E6</item>
+        <item name="colorPrimaryVariant">#187FBF</item>
+        <item name="colorSecondary">#65E206</item>
+        <item name="android:statusBarColor">#1268B6</item>
+        <item name="android:navigationBarColor">@color/black</item>
+    </style>
+
+    <style name="personal2" parent="Theme.Material3.DayNight">
+        <item name="colorPrimary">#23A7B3</item>
+        <item name="colorPrimaryVariant">#5DA006</item>
+        <item name="colorSecondary">#7DF222</item>
+        <item name="android:statusBarColor">#0F616A</item>
+        <item name="android:navigationBarColor">#02282C</item>
+    </style>
+
 </resources>
