@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Sound 432</string>
+    <string name="song_title">Song Title</string>
+    <string name="song_path">Song Path</string>
 </resources>

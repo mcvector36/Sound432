@@ -45,14 +45,6 @@
             android:backgroundTint="?attr/colorPrimary" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/stopButton"
-            style="@style/Widget.Material3.Button.Icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:icon="@drawable/stop"
-            android:backgroundTint="?attr/colorPrimary" />
-
-        <com.google.android.material.button.MaterialButton
             android:id="@+id/nextButton"
             style="@style/Widget.Material3.Button.Icon"
             android:layout_width="wrap_content"
@@ -66,6 +58,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:icon="@drawable/repeat"
+            android:backgroundTint="?attr/colorPrimary" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/stopButton"
+            style="@style/Widget.Material3.Button.Icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:icon="@drawable/stop"
             android:backgroundTint="?attr/colorPrimary" />
 
         <com.google.android.material.button.MaterialButton

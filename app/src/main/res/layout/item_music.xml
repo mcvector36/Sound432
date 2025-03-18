@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/cardView"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -19,15 +20,17 @@
             android:id="@+id/songTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Song Title"
+            android:text="@string/song_title"
             android:textAppearance="?attr/textAppearanceHeadline6" />
 
         <TextView
             android:id="@+id/songPath"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Song Path"
+            android:text="@string/song_path"
             android:textAppearance="?attr/textAppearanceBody2"
-            android:textColor="?attr/colorOnSurfaceVariant" />
+            android:textColor="#8FBDE7F4"
+            android:textSize="9sp"
+            tools:ignore="SmallSp" />
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

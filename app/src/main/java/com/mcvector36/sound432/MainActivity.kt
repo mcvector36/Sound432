@@ -16,6 +16,7 @@ import com.google.android.material.button.MaterialButton
 
 import androidx.annotation.RequiresApi
 import java.io.File
+import kotlin.math.pow
 
 
 class MainActivity : AppCompatActivity() {
@@ -210,8 +211,13 @@ class MainActivity : AppCompatActivity() {
 
             if (isDetuned) {
                 playbackParams.pitch = 0.981f // Ajustare pentru -32 de centi
+
+                // 🔹 Compensare volum (recuperare -4dB)
+                val volumeBoost = 10.0.pow(6.0 / 20.0).toFloat()
+                mediaPlayer.setVolume(volumeBoost, volumeBoost)
             } else {
                 playbackParams.pitch = 1.0f // Revine la acordajul inițial
+                mediaPlayer.setVolume(1.0f, 1.0f) // Revine la volumul normal
             }
 
             playbackParams.speed = 1.0f // Păstrează durata piesei neschimbată
