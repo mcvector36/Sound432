@@ -130,6 +130,7 @@ class MainActivity : AppCompatActivity() {
             start()
         }
         playButton.setIconResource(R.drawable.play_arrow)
+
     }
 
     private fun togglePlayPause() {
@@ -184,7 +185,8 @@ class MainActivity : AppCompatActivity() {
             return
         }
         isRepeat = !isRepeat
-        repeatButton.alpha = if (isRepeat) 1.0f else 0.5f // Evidențiază butonul când e activat
+        mediaPlayer.isLooping
+        repeatButton.alpha = if (isRepeat) 0.5f else 1.0f // Evidențiază butonul când e activat
     }
 
     @RequiresApi(Build.VERSION_CODES.M)
@@ -209,7 +211,7 @@ class MainActivity : AppCompatActivity() {
             mediaPlayer.playbackParams = playbackParams
 
             // Evidențiază butonul vizual
-            detuneButton.alpha = if (isDetuned) 1.0f else 0.5f
+            detuneButton.alpha = if (isDetuned) 0.5f else 1.0f
             detuneButton.invalidate() // Forțează refresh-ul UI-ului
         } else {
             Toast.makeText(this, "Nicio melodie nu este redată!", Toast.LENGTH_SHORT).show()

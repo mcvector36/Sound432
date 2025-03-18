@@ -6,9 +6,13 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
+import java.io.File
 
-class MusicAdapter(private val musicList: List<String>, private val onItemClick: (Int) -> Unit) :
+class MusicAdapter(musicList: List<String>, private val onItemClick: (Int) -> Unit) :
     RecyclerView.Adapter<MusicAdapter.MusicViewHolder>() {
+
+    // Sortează lista melodiilor de la cel mai nou la cel mai vechi
+    private val sortedMusicList = musicList.sortedByDescending { File(it).lastModified() }
 
     class MusicViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val songTitle: TextView = view.findViewById(R.id.songTitle)
@@ -22,7 +26,7 @@ class MusicAdapter(private val musicList: List<String>, private val onItemClick:
     }
 
     override fun onBindViewHolder(holder: MusicViewHolder, position: Int) {
-        val songPath = musicList[position]
+        val songPath = sortedMusicList[position]
         val songName = songPath.substringAfterLast("/") // Extrage doar numele fișierului
 
         holder.songTitle.text = songName
@@ -33,5 +37,5 @@ class MusicAdapter(private val musicList: List<String>, private val onItemClick:
         }
     }
 
-    override fun getItemCount(): Int = musicList.size
+    override fun getItemCount(): Int = sortedMusicList.size
 }

@@ -28,8 +28,9 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_columnWeight="1"
+            android:backgroundTint="#2B81E6"
             app:icon="@drawable/skip_previous"
-            android:backgroundTint="?attr/colorPrimary" />
+            app:iconGravity="textEnd" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/playButton"
@@ -37,8 +38,9 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_columnWeight="1"
+            android:backgroundTint="#2B81E6"
             app:icon="@drawable/play_arrow"
-            android:backgroundTint="?attr/colorPrimary" />
+            app:iconGravity="textEnd" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/nextButton"
@@ -46,8 +48,9 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_columnWeight="1"
+            android:backgroundTint="#2B81E6"
             app:icon="@drawable/skip_next"
-            android:backgroundTint="?attr/colorPrimary" />
+            app:iconGravity="textEnd" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/repeatButton"
@@ -55,8 +58,9 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_columnWeight="1"
+            android:backgroundTint="#2B81E6"
             app:icon="@drawable/repeat"
-            android:backgroundTint="?attr/colorPrimary" />
+            app:iconGravity="textEnd" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/stopButton"
@@ -64,8 +68,9 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_columnWeight="1"
+            android:backgroundTint="#2B81E6"
             app:icon="@drawable/stop"
-            android:backgroundTint="?attr/colorPrimary" />
+            app:iconGravity="textEnd" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/detuneButton"
@@ -73,7 +78,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_columnWeight="1"
+            android:backgroundTint="#2B81E6"
             app:icon="@drawable/tune432"
-            android:backgroundTint="?attr/colorPrimary" />
+            app:iconGravity="textEnd" />
     </android.widget.GridLayout>
 </LinearLayout>
