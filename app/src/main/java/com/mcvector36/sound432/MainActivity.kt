@@ -136,10 +136,24 @@ class MainActivity : AppCompatActivity() {
             setDataSource(musicList[currentIndex].substringAfter("\n")) // Extrage calea fișierului
             prepare()
             start()
-        }
-        playButton.setIconResource(R.drawable.play_arrow)
 
+            // 🔹 Păstrează repeat-ul și dezacordarea după terminarea melodiei
+            setOnCompletionListener {
+                if (isRepeat) {
+                    playMusic(currentIndex) // Redă din nou melodia curentă
+                } else {
+                    nextTrack() // Treci la următoarea melodie
+                }
+            }
+        }
+
+        // 🔹 Aplică dezacordarea dacă este activată, altfel revine la pitch normal
+        applyDetune()
+
+        playButton.setIconResource(R.drawable.pause) // Setează iconița pe pauză când redă
     }
+
+
 
     private fun togglePlayPause() {
         if (musicList.isEmpty()) {
@@ -231,5 +245,23 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun applyDetune() {
+        if (::mediaPlayer.isInitialized) {
+            val playbackParams = mediaPlayer.playbackParams
+
+            if (isDetuned) {
+                playbackParams.pitch = 0.981f // 🔹 -32 centi
+                val volumeBoost = 10.0.pow(6.0 / 20.0).toFloat() // 🔹 Crește volumul pentru compensare
+                mediaPlayer.setVolume(volumeBoost, volumeBoost)
+            } else {
+                playbackParams.pitch = 1.0f // 🔹 Revine la pitch normal
+                mediaPlayer.setVolume(1.0f, 1.0f) // 🔹 Revine la volumul normal
+            }
+
+            playbackParams.speed = 1.0f // Păstrează durata constantă
+            mediaPlayer.playbackParams = playbackParams
+        }
+    }
 
 }
