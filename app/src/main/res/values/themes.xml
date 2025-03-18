@@ -21,8 +21,8 @@
         <item name="colorPrimary">#23A7B3</item>
         <item name="colorPrimaryVariant">#5DA006</item>
         <item name="colorSecondary">#7DF222</item>
-        <item name="android:statusBarColor">#0F616A</item>
-        <item name="android:navigationBarColor">#02282C</item>
+        <item name="android:statusBarColor">#0F5B6A</item>
+        <item name="android:navigationBarColor">#02252C</item>
     </style>
 
 </resources>

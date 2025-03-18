@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
 
 import androidx.annotation.RequiresApi
+import java.io.File
 
 
 class MainActivity : AppCompatActivity() {
@@ -113,6 +114,12 @@ class MainActivity : AppCompatActivity() {
 
         if (musicList.isEmpty()) {
             Toast.makeText(this, "Nu s-au găsit fișiere audio!", Toast.LENGTH_LONG).show()
+        }
+
+        // 🔹 Sortare de la cea mai nouă la cea mai veche 🔹
+        musicList.sortByDescending {
+            val file = File(it.substringAfter("\n"))
+            if (file.exists()) file.lastModified() else 0
         }
 
         recyclerView.layoutManager = LinearLayoutManager(this)
