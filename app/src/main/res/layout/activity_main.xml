@@ -13,7 +13,13 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        android:fastScrollEnabled="true" />
+        android:fastScrollEnabled="true"
+        android:fastScrollAlwaysVisible="false"
+        android:scrollbars="vertical"
+        app:fastScrollHorizontalThumbDrawable="@drawable/fast_scroll_thumb"
+        app:fastScrollVerticalThumbDrawable="@drawable/fast_scroll_thumb"
+        app:fastScrollHorizontalTrackDrawable="@drawable/fast_scroll_track"
+        app:fastScrollVerticalTrackDrawable="@drawable/fast_scroll_track" />
 
     <com.google.android.flexbox.FlexboxLayout
         android:layout_width="match_parent"
