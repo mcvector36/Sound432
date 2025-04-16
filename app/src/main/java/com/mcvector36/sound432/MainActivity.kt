@@ -5,19 +5,20 @@ import android.content.pm.PackageManager
 import android.media.MediaPlayer
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.provider.MediaStore
+import android.widget.SeekBar
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
-
-import androidx.annotation.RequiresApi
 import java.io.File
 import kotlin.math.pow
-
 
 class MainActivity : AppCompatActivity() {
     private lateinit var mediaPlayer: MediaPlayer
@@ -28,8 +29,10 @@ class MainActivity : AppCompatActivity() {
     private lateinit var nextButton: MaterialButton
     private lateinit var prevButton: MaterialButton
     private lateinit var repeatButton: MaterialButton
-
     private lateinit var detuneButton: MaterialButton
+    private lateinit var seekBar: SeekBar
+    private var seekBarHandler = Handler(Looper.getMainLooper())
+    private lateinit var seekBarRunnable: Runnable
 
     private var currentIndex = 0
     private var isRepeat = false
@@ -55,11 +58,11 @@ class MainActivity : AppCompatActivity() {
         nextButton = findViewById(R.id.nextButton)
         prevButton = findViewById(R.id.prevButton)
         repeatButton = findViewById(R.id.repeatButton)
-
         detuneButton = findViewById(R.id.detuneButton)
+        seekBar = findViewById(R.id.seekBar)
+
         detuneButton.setOnClickListener { detuneMusic() }
 
-        // Setare iconițe programatic
         prevButton.setIconResource(R.drawable.skip_previous)
         playButton.setIconResource(R.drawable.play_arrow)
         stopButton.setIconResource(R.drawable.stop)
@@ -67,17 +70,24 @@ class MainActivity : AppCompatActivity() {
         repeatButton.setIconResource(R.drawable.repeat)
         detuneButton.setIconResource(R.drawable.tune432)
 
-
-        // Verifică și cere permisiunea de acces la media
         checkPermissions()
 
-        // Control butoane
         playButton.setOnClickListener { togglePlayPause() }
         stopButton.setOnClickListener { stopMusic() }
         nextButton.setOnClickListener { nextTrack() }
         prevButton.setOnClickListener { previousTrack() }
         repeatButton.setOnClickListener { toggleRepeat() }
         detuneButton.setOnClickListener { detuneMusic() }
+
+        seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                if (fromUser && ::mediaPlayer.isInitialized) {
+                    mediaPlayer.seekTo(progress)
+                }
+            }
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+        })
     }
 
     private fun checkPermissions() {
@@ -117,7 +127,6 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, "Nu s-au găsit fișiere audio!", Toast.LENGTH_LONG).show()
         }
 
-        // 🔹 Sortare de la cea mai nouă la cea mai veche 🔹
         musicList.sortByDescending {
             val file = File(it.substringAfter("\n"))
             if (file.exists()) file.lastModified() else 0
@@ -133,27 +142,34 @@ class MainActivity : AppCompatActivity() {
         }
         currentIndex = index
         mediaPlayer = MediaPlayer().apply {
-            setDataSource(musicList[currentIndex].substringAfter("\n")) // Extrage calea fișierului
+            setDataSource(musicList[currentIndex].substringAfter("\n"))
             prepare()
             start()
 
-            // 🔹 Păstrează repeat-ul și dezacordarea după terminarea melodiei
             setOnCompletionListener {
                 if (isRepeat) {
-                    playMusic(currentIndex) // Redă din nou melodia curentă
+                    playMusic(currentIndex)
                 } else {
-                    nextTrack() // Treci la următoarea melodie
+                    nextTrack()
                 }
             }
         }
 
-        // 🔹 Aplică dezacordarea dacă este activată, altfel revine la pitch normal
         applyDetune()
 
-        playButton.setIconResource(R.drawable.pause) // Setează iconița pe pauză când redă
+        seekBar.max = mediaPlayer.duration
+        seekBarRunnable = object : Runnable {
+            override fun run() {
+                if (::mediaPlayer.isInitialized && mediaPlayer.isPlaying) {
+                    seekBar.progress = mediaPlayer.currentPosition
+                    seekBarHandler.postDelayed(this, 500)
+                }
+            }
+        }
+        seekBarHandler.post(seekBarRunnable)
+
+        playButton.setIconResource(R.drawable.pause)
     }
-
-
 
     private fun togglePlayPause() {
         if (musicList.isEmpty()) {
@@ -162,26 +178,22 @@ class MainActivity : AppCompatActivity() {
         }
 
         if (!::mediaPlayer.isInitialized) {
-            // Dacă nu este inițializat și nu a fost selectată o piesă, începe prima melodie
             playMusic(0)
         } else if (mediaPlayer.isPlaying) {
             mediaPlayer.pause()
             playButton.setIconResource(R.drawable.play_arrow)
         } else {
             mediaPlayer.start()
-            playButton.setIconResource(R.drawable.pause) // Setăm iconița de pauză când redă
+            playButton.setIconResource(R.drawable.pause)
         }
     }
 
     private fun stopMusic() {
-        if (musicList.isEmpty()) {
-            // Dacă nu există melodii, butonul de stop nu face nimic
-            return
-        }
-
+        if (musicList.isEmpty()) return
         if (::mediaPlayer.isInitialized) {
             mediaPlayer.stop()
             mediaPlayer.release()
+            seekBarHandler.removeCallbacks(seekBarRunnable)
         }
         playButton.setIconResource(R.drawable.play_arrow)
     }
@@ -190,7 +202,7 @@ class MainActivity : AppCompatActivity() {
         if (currentIndex < musicList.size - 1) {
             playMusic(currentIndex + 1)
         } else {
-            playMusic(0) // Se întoarce la primul cântec
+            playMusic(0)
         }
     }
 
@@ -198,48 +210,38 @@ class MainActivity : AppCompatActivity() {
         if (currentIndex > 0) {
             playMusic(currentIndex - 1)
         } else {
-            playMusic(musicList.size - 1) // Mergi la ultimul cântec
+            playMusic(musicList.size - 1)
         }
     }
 
     private fun toggleRepeat() {
-        if (musicList.isEmpty()) {
-            return
-        }
+        if (musicList.isEmpty()) return
         isRepeat = !isRepeat
-        mediaPlayer.isLooping
-        repeatButton.alpha = if (isRepeat) 0.5f else 1.0f // Evidențiază butonul când e activat
+        mediaPlayer.isLooping = isRepeat
+        repeatButton.alpha = if (isRepeat) 0.5f else 1.0f
     }
 
     @RequiresApi(Build.VERSION_CODES.M)
     private fun detuneMusic() {
-        if (musicList.isEmpty()) {
-            return
-        }
-
+        if (musicList.isEmpty()) return
         if (::mediaPlayer.isInitialized && mediaPlayer.isPlaying) {
             val playbackParams = mediaPlayer.playbackParams
-            isDetuned = !isDetuned // Inversează starea dezacordării
-
-            detuneButton.alpha = 0.5f
+            isDetuned = !isDetuned
 
             if (isDetuned) {
-                playbackParams.pitch = 0.981f // Ajustare pentru -32 de centi
-
-                // 🔹 Compensare volum (recuperare -4dB)
+                playbackParams.pitch = 0.981f
                 val volumeBoost = 10.0.pow(6.0 / 20.0).toFloat()
                 mediaPlayer.setVolume(volumeBoost, volumeBoost)
             } else {
-                playbackParams.pitch = 1.0f // Revine la acordajul inițial
-                mediaPlayer.setVolume(1.0f, 1.0f) // Revine la volumul normal
+                playbackParams.pitch = 1.0f
+                mediaPlayer.setVolume(1.0f, 1.0f)
             }
 
-            playbackParams.speed = 1.0f // Păstrează durata piesei neschimbată
+            playbackParams.speed = 1.0f
             mediaPlayer.playbackParams = playbackParams
 
-            // Evidențiază butonul vizual
             detuneButton.alpha = if (isDetuned) 0.5f else 1.0f
-            detuneButton.invalidate() // Forțează refresh-ul UI-ului
+            detuneButton.invalidate()
         } else {
             Toast.makeText(this, "Nicio melodie nu este redată!", Toast.LENGTH_SHORT).show()
         }
@@ -251,17 +253,21 @@ class MainActivity : AppCompatActivity() {
             val playbackParams = mediaPlayer.playbackParams
 
             if (isDetuned) {
-                playbackParams.pitch = 0.981f // 🔹 -32 centi
-                val volumeBoost = 10.0.pow(6.0 / 20.0).toFloat() // 🔹 Crește volumul pentru compensare
+                playbackParams.pitch = 0.981f
+                val volumeBoost = 10.0.pow(6.0 / 20.0).toFloat()
                 mediaPlayer.setVolume(volumeBoost, volumeBoost)
             } else {
-                playbackParams.pitch = 1.0f // 🔹 Revine la pitch normal
-                mediaPlayer.setVolume(1.0f, 1.0f) // 🔹 Revine la volumul normal
+                playbackParams.pitch = 1.0f
+                mediaPlayer.setVolume(1.0f, 1.0f)
             }
 
-            playbackParams.speed = 1.0f // Păstrează durata constantă
+            playbackParams.speed = 1.0f
             mediaPlayer.playbackParams = playbackParams
         }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        seekBarHandler.removeCallbacks(seekBarRunnable)
+    }
 }
