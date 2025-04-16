@@ -9,6 +9,7 @@ import android.os.Handler
 import android.os.Looper
 import android.provider.MediaStore
 import android.widget.SeekBar
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
@@ -31,6 +32,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var repeatButton: MaterialButton
     private lateinit var detuneButton: MaterialButton
     private lateinit var seekBar: SeekBar
+    private lateinit var currentTimeText: TextView
+    private lateinit var totalTimeText: TextView
     private var seekBarHandler = Handler(Looper.getMainLooper())
     private lateinit var seekBarRunnable: Runnable
 
@@ -60,8 +63,8 @@ class MainActivity : AppCompatActivity() {
         repeatButton = findViewById(R.id.repeatButton)
         detuneButton = findViewById(R.id.detuneButton)
         seekBar = findViewById(R.id.seekBar)
-
-        detuneButton.setOnClickListener { detuneMusic() }
+        currentTimeText = findViewById(R.id.currentTimeText)
+        totalTimeText = findViewById(R.id.totalTimeText)
 
         prevButton.setIconResource(R.drawable.skip_previous)
         playButton.setIconResource(R.drawable.play_arrow)
@@ -83,8 +86,10 @@ class MainActivity : AppCompatActivity() {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 if (fromUser && ::mediaPlayer.isInitialized) {
                     mediaPlayer.seekTo(progress)
+                    currentTimeText.text = formatTime(progress)
                 }
             }
+
             override fun onStartTrackingTouch(seekBar: SeekBar?) {}
             override fun onStopTrackingTouch(seekBar: SeekBar?) {}
         })
@@ -136,10 +141,12 @@ class MainActivity : AppCompatActivity() {
         recyclerView.adapter = MusicAdapter(musicList) { playMusic(it) }
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
     private fun playMusic(index: Int) {
         if (::mediaPlayer.isInitialized) {
             mediaPlayer.release()
         }
+
         currentIndex = index
         mediaPlayer = MediaPlayer().apply {
             setDataSource(musicList[currentIndex].substringAfter("\n"))
@@ -158,10 +165,15 @@ class MainActivity : AppCompatActivity() {
         applyDetune()
 
         seekBar.max = mediaPlayer.duration
+        totalTimeText.text = formatTime(mediaPlayer.duration)
+        currentTimeText.text = "00:00"
+
         seekBarRunnable = object : Runnable {
             override fun run() {
                 if (::mediaPlayer.isInitialized && mediaPlayer.isPlaying) {
-                    seekBar.progress = mediaPlayer.currentPosition
+                    val pos = mediaPlayer.currentPosition
+                    seekBar.progress = pos
+                    currentTimeText.text = formatTime(pos)
                     seekBarHandler.postDelayed(this, 500)
                 }
             }
@@ -190,11 +202,16 @@ class MainActivity : AppCompatActivity() {
 
     private fun stopMusic() {
         if (musicList.isEmpty()) return
+
         if (::mediaPlayer.isInitialized) {
             mediaPlayer.stop()
             mediaPlayer.release()
             seekBarHandler.removeCallbacks(seekBarRunnable)
         }
+
+        seekBar.progress = 0
+        currentTimeText.text = "00:00"
+        totalTimeText.text = "00:00"
         playButton.setIconResource(R.drawable.play_arrow)
     }
 
@@ -224,6 +241,7 @@ class MainActivity : AppCompatActivity() {
     @RequiresApi(Build.VERSION_CODES.M)
     private fun detuneMusic() {
         if (musicList.isEmpty()) return
+
         if (::mediaPlayer.isInitialized && mediaPlayer.isPlaying) {
             val playbackParams = mediaPlayer.playbackParams
             isDetuned = !isDetuned
@@ -269,5 +287,11 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         seekBarHandler.removeCallbacks(seekBarRunnable)
+    }
+
+    private fun formatTime(ms: Int): String {
+        val minutes = (ms / 1000) / 60
+        val seconds = (ms / 1000) % 60
+        return String.format("%02d:%02d", minutes, seconds)
     }
 }
