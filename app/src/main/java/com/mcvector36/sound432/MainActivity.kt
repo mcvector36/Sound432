@@ -43,11 +43,8 @@ class MainActivity : AppCompatActivity() {
 
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-            if (isGranted) {
-                loadMusic()
-            } else {
-                Toast.makeText(this, "Permisiunea este necesară pentru a accesa muzica!", Toast.LENGTH_SHORT).show()
-            }
+            if (isGranted) loadMusic()
+            else Toast.makeText(this, "Permisiunea este necesară pentru a accesa muzica!", Toast.LENGTH_SHORT).show()
         }
 
     @RequiresApi(Build.VERSION_CODES.M)
@@ -96,11 +93,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun checkPermissions() {
-        val permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        val permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
             Manifest.permission.READ_MEDIA_AUDIO
-        } else {
+        else
             Manifest.permission.READ_EXTERNAL_STORAGE
-        }
 
         if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
             requestPermissionLauncher.launch(permission)
@@ -120,7 +116,6 @@ class MainActivity : AppCompatActivity() {
         cursor?.use {
             val pathColumn = it.getColumnIndex(MediaStore.Audio.Media.DATA)
             val nameColumn = it.getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME)
-
             while (it.moveToNext()) {
                 val path = it.getString(pathColumn)
                 val name = it.getString(nameColumn)
@@ -154,11 +149,7 @@ class MainActivity : AppCompatActivity() {
             start()
 
             setOnCompletionListener {
-                if (isRepeat) {
-                    playMusic(currentIndex)
-                } else {
-                    nextTrack()
-                }
+                if (isRepeat) playMusic(currentIndex) else nextTrack()
             }
         }
 
@@ -179,6 +170,9 @@ class MainActivity : AppCompatActivity() {
             }
         }
         seekBarHandler.post(seekBarRunnable)
+
+        // 🔹 Actualizează vizual piesa curentă
+        (recyclerView.adapter as? MusicAdapter)?.setCurrentPlaying(currentIndex)
 
         playButton.setIconResource(R.drawable.pause)
     }
@@ -202,7 +196,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun stopMusic() {
         if (musicList.isEmpty()) return
-
         if (::mediaPlayer.isInitialized) {
             mediaPlayer.stop()
             mediaPlayer.release()
@@ -241,7 +234,6 @@ class MainActivity : AppCompatActivity() {
     @RequiresApi(Build.VERSION_CODES.M)
     private fun detuneMusic() {
         if (musicList.isEmpty()) return
-
         if (::mediaPlayer.isInitialized && mediaPlayer.isPlaying) {
             val playbackParams = mediaPlayer.playbackParams
             isDetuned = !isDetuned
@@ -269,7 +261,6 @@ class MainActivity : AppCompatActivity() {
     private fun applyDetune() {
         if (::mediaPlayer.isInitialized) {
             val playbackParams = mediaPlayer.playbackParams
-
             if (isDetuned) {
                 playbackParams.pitch = 0.981f
                 val volumeBoost = 10.0.pow(6.0 / 20.0).toFloat()
@@ -278,7 +269,6 @@ class MainActivity : AppCompatActivity() {
                 playbackParams.pitch = 1.0f
                 mediaPlayer.setVolume(1.0f, 1.0f)
             }
-
             playbackParams.speed = 1.0f
             mediaPlayer.playbackParams = playbackParams
         }
