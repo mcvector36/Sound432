@@ -276,12 +276,23 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        if (::mediaPlayer.isInitialized) {
+            mediaPlayer.stop()
+            mediaPlayer.release()
+        }
         seekBarHandler.removeCallbacks(seekBarRunnable)
     }
+
 
     private fun formatTime(ms: Int): String {
         val minutes = (ms / 1000) / 60
         val seconds = (ms / 1000) % 60
         return String.format("%02d:%02d", minutes, seconds)
     }
+
+    override fun onConfigurationChanged(newConfig: android.content.res.Configuration) {
+        super.onConfigurationChanged(newConfig)
+        // Nu facem nimic aici – doar prevenim recrearea activității
+    }
+
 }
