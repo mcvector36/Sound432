@@ -1,12 +1,11 @@
 package com.mcvector36.sound432
 
 import android.Manifest
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.pm.PackageManager
 import android.media.MediaPlayer
-import android.os.Build
-import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
+import android.os.*
 import android.provider.MediaStore
 import android.widget.SeekBar
 import android.widget.TextView
@@ -14,6 +13,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -22,6 +22,7 @@ import java.io.File
 import kotlin.math.pow
 
 class MainActivity : AppCompatActivity() {
+
     private lateinit var mediaPlayer: MediaPlayer
     private lateinit var musicList: ArrayList<String>
     private lateinit var recyclerView: RecyclerView
@@ -51,6 +52,15 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        // 🔧 Creează canalul de notificare
+        createNotificationChannel()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 100)
+            }
+        }
 
         recyclerView = findViewById(R.id.recyclerView)
         playButton = findViewById(R.id.playButton)
@@ -90,6 +100,7 @@ class MainActivity : AppCompatActivity() {
             override fun onStartTrackingTouch(seekBar: SeekBar?) {}
             override fun onStopTrackingTouch(seekBar: SeekBar?) {}
         })
+
     }
 
     private fun checkPermissions() {
@@ -125,6 +136,7 @@ class MainActivity : AppCompatActivity() {
 
         if (musicList.isEmpty()) {
             Toast.makeText(this, "Nu s-au găsit fișiere audio!", Toast.LENGTH_LONG).show()
+            return
         }
 
         musicList.sortByDescending {
@@ -171,10 +183,12 @@ class MainActivity : AppCompatActivity() {
         }
         seekBarHandler.post(seekBarRunnable)
 
-        // 🔹 Actualizează vizual piesa curentă
         (recyclerView.adapter as? MusicAdapter)?.setCurrentPlaying(currentIndex)
 
         playButton.setIconResource(R.drawable.pause)
+
+        // 🔔 Afișează notificarea
+        showPlaybackNotification(musicList[index].substringBefore("\n"))
     }
 
     private fun togglePlayPause() {
@@ -206,6 +220,10 @@ class MainActivity : AppCompatActivity() {
         currentTimeText.text = "00:00"
         totalTimeText.text = "00:00"
         playButton.setIconResource(R.drawable.play_arrow)
+
+        // 🛑 Șterge notificarea
+        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.cancel(1001)
     }
 
     private fun nextTrack() {
@@ -274,25 +292,45 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        if (::mediaPlayer.isInitialized) {
-            mediaPlayer.stop()
-            mediaPlayer.release()
-        }
-        seekBarHandler.removeCallbacks(seekBarRunnable)
-    }
-
-
     private fun formatTime(ms: Int): String {
         val minutes = (ms / 1000) / 60
         val seconds = (ms / 1000) % 60
         return String.format("%02d:%02d", minutes, seconds)
     }
 
-    override fun onConfigurationChanged(newConfig: android.content.res.Configuration) {
-        super.onConfigurationChanged(newConfig)
-        // Nu facem nimic aici – doar prevenim recrearea activității
+    // 🔔 Creează canalul pentru notificări (la start)
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                "playback_channel",
+                "Playback Notifications",
+                NotificationManager.IMPORTANCE_LOW
+            ).apply {
+                description = "Afișează notificări în timpul redării"
+            }
+            val manager = getSystemService(NotificationManager::class.java)
+            manager?.createNotificationChannel(channel)
+        }
     }
 
+    // 🔔 Notificare când se redă
+    private fun showPlaybackNotification(title: String) {
+        val notification = NotificationCompat.Builder(this, "playback_channel")
+            .setSmallIcon(R.drawable.logo)
+            .setContentTitle("Se redă")
+            .setContentText(title)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setOngoing(true)
+            .build()
+
+        val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        manager.notify(1001, notification)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        seekBarHandler.removeCallbacks(seekBarRunnable)
+        val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        manager.cancel(1001)
+    }
 }
